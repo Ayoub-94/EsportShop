@@ -1,0 +1,6 @@
+@EsportShop.Api_HostAddress = http://localhost:5250
+
+GET {{EsportShop.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
