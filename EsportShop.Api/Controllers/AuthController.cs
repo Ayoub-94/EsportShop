@@ -35,12 +35,6 @@ namespace EsportShop.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
                 var response = await _authService.RegisterAsync(request);

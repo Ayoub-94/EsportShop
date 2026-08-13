@@ -23,7 +23,7 @@ namespace EsportShop.Api.Services
         {
             // 1. Vérifier si l'utilisateur existe déjà
             var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email);
-            if (existingUser != null) throw new Exception("Cet e_mail est déjà utilisé.");
+            if (existingUser != null) throw new InvalidOperationException("Cet e-mail est déjà utilisé.");
 
             // 2. Hacher le mot de passe (utiliser BCrypt)
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
