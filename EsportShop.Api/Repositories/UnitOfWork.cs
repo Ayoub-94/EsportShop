@@ -10,16 +10,19 @@ namespace EsportShop.Api.Repositories
         public ICategoryRepository Categories { get; }
         public IProductRepository Products { get; }
         public IUserRepository Users { get; }
+        public ICartRepository Carts { get; }
 
         public UnitOfWork(AppDbContext context, 
             ICategoryRepository categoryRepository, 
             IProductRepository productRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            ICartRepository cartRepository)
         {
             _context = context;
             Categories = categoryRepository;
             Products = productRepository;
             Users = userRepository;
+            Carts = cartRepository;
         }
 
         public async Task<bool> CompleteAsync()

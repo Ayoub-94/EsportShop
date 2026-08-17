@@ -5,6 +5,7 @@
         ICategoryRepository Categories { get; }
         IProductRepository Products { get; }
         IUserRepository Users { get; }
+        ICartRepository Carts { get; }
 
         Task<bool> CompleteAsync();
     }
