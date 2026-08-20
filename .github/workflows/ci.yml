@@ -2,9 +2,9 @@ name: CI EsportShop
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "feature/stateful-cart" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "feature/stateful-cart" ]
 
 jobs:
   build-and-test:
