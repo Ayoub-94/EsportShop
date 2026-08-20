@@ -1,0 +1,26 @@
+name: CI EsportShop
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Récupérer le code du dépôt
+      uses: actions/checkout@v4
+
+    - name: Installer le SDK .NET 9.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restaurer les dépendances
+      run: dotnet restore
+
+    - name: Compiler le projet
+      run: dotnet build --no-restore --configuration Release

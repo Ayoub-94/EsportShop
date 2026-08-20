@@ -8,5 +8,9 @@ namespace EsportShop.Api.Services
         Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync();
         Task<ProductResponseDto?> GetProductByIdAsync(int id);
         Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto);
+
+        Task UpdateProductAsync(int id, ProductUpdateDto dto);
+        Task DeleteProductAsync(int id);
+        Task DeleteAllProductAsync();
     }
 }
