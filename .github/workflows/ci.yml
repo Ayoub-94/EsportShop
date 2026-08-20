@@ -2,9 +2,9 @@ name: CI EsportShop
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "feature/stateful-cart" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "feature/stateful-cart" ]
 
 jobs:
   build-and-test:
@@ -24,3 +24,6 @@ jobs:
 
     - name: Compiler le projet
       run: dotnet build --no-restore --configuration Release
+
+    - name: Lancer les tests unitaires
+      run: dotnet test --no-build --configuration Release
