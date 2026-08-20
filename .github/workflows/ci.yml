@@ -25,5 +25,5 @@ jobs:
     - name: Compiler le projet
       run: dotnet build --no-restore --configuration Release
 
-- name: Lancer les tests unitaires
+    - name: Lancer les tests unitaires
       run: dotnet test --no-build --configuration Release
