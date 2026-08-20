@@ -31,7 +31,7 @@ namespace EsportShop.Api.Services
         {
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category == null) return null; // Ou lever une exception personnalisée NotFoundException
-
+                
             return new CategoryResponseDto
             {
                 Id = category.Id,
@@ -70,6 +70,56 @@ namespace EsportShop.Api.Services
                 Name = category.Name,
                 Description = category.Description
             };
+        }
+
+        public async Task UpdateCategoryAsync(int id, CategoryUpdateDto dto)
+        {
+            // 1. Récupérer la catégorie existante
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            if (category == null)
+            {
+                throw new KeyNotFoundException($"La catégorie avec l'ID {id} est introuvable.");
+            }
+
+            // 2. Validation métier (si nécessaire)
+            if (string.IsNullOrWhiteSpace(dto?.Name))
+            {
+                throw new ArgumentException("Le nom de la catégorie est obligatoire.");
+            }
+
+            // 3. Mise à jour des propriétés (avec nettoyage)
+            category.Name = dto.Name.Trim();
+            category.Description = dto.Description?.Trim() ?? string.Empty;
+
+            // 4. Appel au repository pour signaler la modification
+            await _unitOfWork.Categories.UpdateAsync(category);
+
+            // 5. Sauvegarde via l'Unit of Work
+            var success = await _unitOfWork.CompleteAsync();
+            if (!success)
+            {
+                throw new Exception("Erreur lors de la mise à jour de la catégorie.");
+            }
+        }
+
+        public async Task DeleteCategoryAsync(int id)
+        {
+            // 1. Récupérer la catégorie existante
+            var category =await  _unitOfWork.Categories.GetByIdAsync(id); 
+            if(category == null)
+            {
+                throw new KeyNotFoundException($"La catégorie avec l'ID {id} est introuvable.");
+            }
+
+            // 2. Suppression via le repository
+             await _unitOfWork.Categories.DeleteAsync(category);
+
+            // 3. Ne pas oublier de valider les changements via l'Unit of Work !
+            var success = await _unitOfWork.CompleteAsync();
+            if(!success)
+            {
+                throw new Exception("Erreur lors de la suppression de la catégorie.");
+            }
         }
     }
 }

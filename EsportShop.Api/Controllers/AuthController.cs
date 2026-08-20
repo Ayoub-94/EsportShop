@@ -1,7 +1,10 @@
 ﻿using EsportShop.Api.DTOs;
 using EsportShop.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Security.Claims;
 
 namespace EsportShop.Api.Controllers
 {
@@ -35,25 +38,11 @@ namespace EsportShop.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var response = await _authService.RegisterAsync(request);
-                _logger.LogInformation("Nouvel utilisateur inscrit avec succès : {Email}", request.Email);
-                return StatusCode(StatusCodes.Status201Created, response);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogWarning("Tentative d'inscription échouée pour {Email} : {Message}", request.Email, ex.Message);
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                // On va chercher la vraie erreur cachée (InnerException) si elle existe
-                var innerMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+           var response = await _authService.RegisterAsync(request);
 
-                _logger.LogError(ex, "Erreur interne lors de l'inscription de l'utilisateur {Email}", request.Email);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Une erreur de base de données est survenue.", details = innerMessage });
-            }
+            _logger.LogInformation("Nouvel utilisateur inscrit avec succès : {Email}", request.Email);
+
+            return StatusCode(StatusCodes.Status201Created, response);
         }
 
         /// <summary>
@@ -62,34 +51,23 @@ namespace EsportShop.Api.Controllers
         /// <param name="request">Les identifiants de connexion (Email et Mot de passe)</param>
         /// <returns>Le jeton d'accès JWT</returns>
         [HttpPost("Login")]
+        [EnableRateLimiting("StrictPolicy")] 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] UserLoginDto request)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var token = await _authService.LoginAsync(request);
 
-                _logger.LogInformation("Connexion réussie pour l'utilisateur : {Email}", request.Email);
+            var token = await _authService.LoginAsync(request);
 
-                return Ok(new { token });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                _logger.LogWarning("Tentative de connexion échouée (identifiants invalides) pour {Email}", request.Email);
-                return Unauthorized(new { error = ex.Message });
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, "Erreur interne lors de la connexion de l'utilisateur {Email}", request.Email);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Une erreur interne est survenue." });
-            }
+            _logger.LogInformation("Connexion réussie pour l'utilisateur : {Email}", request.Email);
+
+            return Ok(new { token });
         }
     }
 }

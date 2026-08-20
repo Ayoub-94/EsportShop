@@ -79,5 +79,67 @@ namespace EsportShop.Api.Services
                 CategoryName = category.Name
             };
         }
+
+        // 4. UPDATE (Mettre à jour un produit)
+        public async Task UpdateProductAsync(int id, ProductUpdateDto dto)
+        {
+            // Récupérer le produit existant 
+            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            if(product == null)
+            {
+                throw new KeyNotFoundException($"Le produit avec l'ID {id} est introuvable.");
+            }
+
+            product.Name = dto.Name.Trim();
+            product.Description = dto.Description.Trim();
+            product.Price = dto.Price;
+            product.Stock = dto.Stock;
+
+            _unitOfWork.Products.UpdateAsync(product);
+            var success = await _unitOfWork.CompleteAsync();
+
+            if(!success)
+            {
+                throw new Exception("Erreur lors de la mise à jour du produit en base de données.");
+            }
+        }
+
+        // 5. DELETE (Supprimer un produit)
+        public async Task DeleteProductAsync(int id)
+        {
+            // Récupérer le produit existant
+            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            if (product == null)
+            {
+                throw new KeyNotFoundException($"Le produit avec l'ID {id} est introuvable.");
+            }
+
+            // Supprimer le produit
+            _unitOfWork.Products.DeleteAsync(product);
+            var success = await _unitOfWork.CompleteAsync();
+
+            if(!success)
+            {
+                throw new Exception("Erreur lors de la suppression du produit en base de données.");
+            }
+        }
+
+        public async Task DeleteAllProductAsync()
+        {
+            var allProducts = await _unitOfWork.Products.GetAllAsync();
+
+            if (!allProducts.Any()) return;
+
+            foreach (var product in allProducts)
+            {
+                _unitOfWork.Products.DeleteAsync(product);
+            }
+
+            if (!await _unitOfWork.CompleteAsync())
+            {
+                throw new Exception("Erreur lors de la suppression de tous les produits.");
+
+            }
+        }
     }
 }

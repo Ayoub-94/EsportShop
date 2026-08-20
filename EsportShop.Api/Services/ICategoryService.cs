@@ -8,5 +8,7 @@ namespace EsportShop.Api.Services
         Task<IEnumerable<CategoryResponseDto>> GetAllCategoriesAsync();
         Task<CategoryResponseDto?> GetCategoryByIdAsync(int id);
         Task<CategoryResponseDto> CreateCategoryAsync(CategoryCreateDto dto);
+        Task UpdateCategoryAsync(int id, CategoryUpdateDto dto);
+        Task DeleteCategoryAsync(int id);
     }
 }

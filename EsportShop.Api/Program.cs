@@ -1,8 +1,10 @@
 using EsportShop.Api.Controllers;
 using EsportShop.Api.Data;
+using EsportShop.Api.Middlewares;
 using EsportShop.Api.Repositories;
 using EsportShop.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -31,6 +33,25 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("StrictPolicy", opt =>
+    {
+        opt.PermitLimit = 5;                  // Maximum 5 requêtes
+        opt.Window = TimeSpan.FromMinutes(1); // Par fenêtre de 1 minute 
+        opt.QueueLimit = 0;                   // Pas de file d'attente
+    });
+
+    // --- AJOUTE CECI POUR AVOIR UN VRAI 429 PROPRE ---
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync("{\"message\": \"Trop de tentatives. Veuillez réessayer plus tard.\"}", cancellationToken);
+    };
+});
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -83,6 +104,8 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseRateLimiter();
 // 4. Configuration des tuyaux de traitement (Middlewares)
 if (app.Environment.IsDevelopment())
 {
