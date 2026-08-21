@@ -38,7 +38,7 @@ namespace EsportShop.Api.Controllers
 
             _logger.LogInformation("Produit créé avec succès ID : {ProductId}", createdProduct.Id);
 
-            return CreatedAtAction(nameof(GetById), new { id = createdProduct.Id });
+            return CreatedAtAction(nameof(GetById), new { id = createdProduct.Id }, createdProduct);
         }
 
         // 2. READ ALL (Récupérer tous les produits - Accessible à tous, ou [Authorize] selon votre besoin)

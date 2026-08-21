@@ -1,6 +1,7 @@
 ﻿using EsportShop.Api.DTOs;
 using EsportShop.Api.Models;
 using EsportShop.Api.Repositories;
+using Mapster;
 
 namespace EsportShop.Api.Services
 {
@@ -17,15 +18,7 @@ namespace EsportShop.Api.Services
         {
             var products = await _unitOfWork.Products.GetAllAsync();
 
-            return products.Select(p => new ProductResponseDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                Stock = p.Stock,
-                CategoryName = p.Category?.Name ?? "Aucune catégorie"
-            });
+            return products.Adapt<IEnumerable<ProductResponseDto>>();
         }
 
         public async Task<ProductResponseDto?> GetProductByIdAsync(int id)
@@ -33,15 +26,7 @@ namespace EsportShop.Api.Services
             var product = await _unitOfWork.Products.GetByIdAsync(id);
             if(product == null) return null;
 
-            return new ProductResponseDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Stock = product.Stock,
-                CategoryName = product.Category?.Name ?? "Aucune catégorie"
-            };
+            return product.Adapt<ProductResponseDto>();
         }
 
         public async Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto)
@@ -52,14 +37,7 @@ namespace EsportShop.Api.Services
                 throw new ArgumentException($"La catégorie avec l'ID {dto.CategoryId} n'existe pas");
             }
 
-            var product = new Product
-            {
-                Name = dto.Name.Trim(),
-                Description = dto.Description.Trim(),
-                Price = dto.Price,
-                Stock = dto.Stock,
-                CategoryId = category.Id,
-            };
+            var product = dto.Adapt<Product>();
 
             await _unitOfWork.Products.AddAsync(product);
             var succes = await _unitOfWork.CompleteAsync();
@@ -69,15 +47,10 @@ namespace EsportShop.Api.Services
                 throw new Exception("Erreur lors de l'enregistrement du produit en base de données.");
             }
 
-            return new ProductResponseDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Stock = product.Stock,
-                CategoryName = category.Name
-            };
+           var responseDto = product.Adapt<ProductResponseDto>();
+            responseDto.CategoryName = category.Name;
+
+            return responseDto;
         }
 
         // 4. UPDATE (Mettre à jour un produit)
@@ -90,10 +63,7 @@ namespace EsportShop.Api.Services
                 throw new KeyNotFoundException($"Le produit avec l'ID {id} est introuvable.");
             }
 
-            product.Name = dto.Name.Trim();
-            product.Description = dto.Description.Trim();
-            product.Price = dto.Price;
-            product.Stock = dto.Stock;
+            dto.Adapt(product);
 
             _unitOfWork.Products.UpdateAsync(product);
             var success = await _unitOfWork.CompleteAsync();
