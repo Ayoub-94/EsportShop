@@ -14,24 +14,24 @@ namespace EsportShop.Api.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync()
+        public async Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync(CancellationToken cancellationToken)
         {
-            var products = await _unitOfWork.Products.GetAllAsync();
+            var products = await _unitOfWork.Products.GetAllAsync(cancellationToken);
 
             return products.Adapt<IEnumerable<ProductResponseDto>>();
         }
 
-        public async Task<ProductResponseDto?> GetProductByIdAsync(int id)
+        public async Task<ProductResponseDto?> GetProductByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetByIdAsync(id, cancellationToken);
             if(product == null) return null;
 
             return product.Adapt<ProductResponseDto>();
         }
 
-        public async Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto)
+        public async Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto, CancellationToken cancellationToken)
         {
-            var category = await _unitOfWork.Categories.GetByIdAsync(dto.CategoryId);
+            var category = await _unitOfWork.Categories.GetByIdAsync(dto.CategoryId, cancellationToken);
             if(category == null)
             {
                 throw new ArgumentException($"La catégorie avec l'ID {dto.CategoryId} n'existe pas");
@@ -39,8 +39,8 @@ namespace EsportShop.Api.Services
 
             var product = dto.Adapt<Product>();
 
-            await _unitOfWork.Products.AddAsync(product);
-            var succes = await _unitOfWork.CompleteAsync();
+            await _unitOfWork.Products.AddAsync(product, cancellationToken);
+            var succes = await _unitOfWork.CompleteAsync(cancellationToken);
 
             if(!succes)
             {
@@ -54,10 +54,10 @@ namespace EsportShop.Api.Services
         }
 
         // 4. UPDATE (Mettre à jour un produit)
-        public async Task UpdateProductAsync(int id, ProductUpdateDto dto)
+        public async Task UpdateProductAsync(int id, ProductUpdateDto dto, CancellationToken cancellationToken)
         {
             // Récupérer le produit existant 
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetByIdAsync(id, cancellationToken);
             if(product == null)
             {
                 throw new KeyNotFoundException($"Le produit avec l'ID {id} est introuvable.");
@@ -65,8 +65,8 @@ namespace EsportShop.Api.Services
 
             dto.Adapt(product);
 
-            _unitOfWork.Products.UpdateAsync(product);
-            var success = await _unitOfWork.CompleteAsync();
+            await _unitOfWork.Products.UpdateAsync(product, cancellationToken);
+            var success = await _unitOfWork.CompleteAsync(cancellationToken);
 
             if(!success)
             {
@@ -75,18 +75,18 @@ namespace EsportShop.Api.Services
         }
 
         // 5. DELETE (Supprimer un produit)
-        public async Task DeleteProductAsync(int id)
+        public async Task DeleteProductAsync(int id, CancellationToken cancellationToken)
         {
             // Récupérer le produit existant
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetByIdAsync(id, cancellationToken);
             if (product == null)
             {
                 throw new KeyNotFoundException($"Le produit avec l'ID {id} est introuvable.");
             }
 
             // Supprimer le produit
-            _unitOfWork.Products.DeleteAsync(product);
-            var success = await _unitOfWork.CompleteAsync();
+            await _unitOfWork.Products.DeleteAsync(product, cancellationToken);
+            var success = await _unitOfWork.CompleteAsync(cancellationToken);
 
             if(!success)
             {
@@ -94,18 +94,18 @@ namespace EsportShop.Api.Services
             }
         }
 
-        public async Task DeleteAllProductAsync()
+        public async Task DeleteAllProductAsync(CancellationToken cancellationToken)
         {
-            var allProducts = await _unitOfWork.Products.GetAllAsync();
+            var allProducts = await _unitOfWork.Products.GetAllAsync(cancellationToken);
 
             if (!allProducts.Any()) return;
 
             foreach (var product in allProducts)
             {
-                _unitOfWork.Products.DeleteAsync(product);
+                await _unitOfWork.Products.DeleteAsync(product, cancellationToken);
             }
 
-            if (!await _unitOfWork.CompleteAsync())
+            if (!await _unitOfWork.CompleteAsync(cancellationToken))
             {
                 throw new Exception("Erreur lors de la suppression de tous les produits.");
 

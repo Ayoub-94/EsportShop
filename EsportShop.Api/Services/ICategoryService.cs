@@ -5,10 +5,10 @@ namespace EsportShop.Api.Services
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryResponseDto>> GetAllCategoriesAsync();
-        Task<CategoryResponseDto?> GetCategoryByIdAsync(int id);
-        Task<CategoryResponseDto> CreateCategoryAsync(CategoryCreateDto dto);
-        Task UpdateCategoryAsync(int id, CategoryUpdateDto dto);
-        Task DeleteCategoryAsync(int id);
+        Task<IEnumerable<CategoryResponseDto>> GetAllCategoriesAsync(CancellationToken cancellationToken);
+        Task<CategoryResponseDto?> GetCategoryByIdAsync(int id, CancellationToken cancellationToken);
+        Task<CategoryResponseDto> CreateCategoryAsync(CategoryCreateDto dto, CancellationToken cancellationToken);
+        Task UpdateCategoryAsync(int id, CategoryUpdateDto dto, CancellationToken cancellationToken);
+        Task DeleteCategoryAsync(int id, CancellationToken cancellationToken);
     }
 }

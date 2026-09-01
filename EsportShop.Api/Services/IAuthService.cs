@@ -4,7 +4,7 @@ namespace EsportShop.Api.Services
 {
     public interface IAuthService
     {
-        Task<UserResponseDto> RegisterAsync(UserRegisterDto request);
-        Task<string> LoginAsync(UserLoginDto request);
+        Task<UserResponseDto> RegisterAsync(UserRegisterDto request, CancellationToken cancellationToken);
+        Task<string> LoginAsync(UserLoginDto request, CancellationToken cancellationToken);
     }
 }

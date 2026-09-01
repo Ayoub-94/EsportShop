@@ -12,22 +12,22 @@ namespace EsportShop.Api.Repositories
             _context = context;
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         {
             return await _context.Users
                 .AsTracking()
-                .FirstOrDefaultAsync(u  => u.Email == email);
+                .FirstOrDefaultAsync(u  => u.Email == email, cancellationToken);
         }
 
-        public async Task<User?> GetByIdAsync(int id)
+        public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             return await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == id);
+                .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
 
-        public async Task AddAsync(User user)
+        public async Task AddAsync(User user, CancellationToken cancellationToken)
         {
-            await _context.Users.AddAsync(user);
+            await _context.Users.AddAsync(user, cancellationToken);
         }
     }
 }

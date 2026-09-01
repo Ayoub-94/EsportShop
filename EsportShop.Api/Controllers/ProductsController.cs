@@ -27,14 +27,14 @@ namespace EsportShop.Api.Controllers
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ProductResponseDto>> Create([FromBody] ProductCreateDto dto)
+        public async Task<ActionResult<ProductResponseDto>> Create([FromBody] ProductCreateDto dto, CancellationToken cancellationToken)
         {
            if(!ModelState.IsValid)
            {
                return BadRequest(ModelState);
            }
 
-            var createdProduct = await _productService.CreateProductAsync(dto);
+            var createdProduct = await _productService.CreateProductAsync(dto, cancellationToken);
 
             _logger.LogInformation("Produit créé avec succès ID : {ProductId}", createdProduct.Id);
 
@@ -44,9 +44,9 @@ namespace EsportShop.Api.Controllers
         // 2. READ ALL (Récupérer tous les produits - Accessible à tous, ou [Authorize] selon votre besoin)
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<ProductResponseDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetAll(CancellationToken cancellationToken)
         {
-            var products = await _productService.GetAllProductsAsync();
+            var products = await _productService.GetAllProductsAsync(cancellationToken);
             return Ok(products);
         }
 
@@ -54,9 +54,9 @@ namespace EsportShop.Api.Controllers
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductResponseDto>> GetById(int id)
+        public async Task<ActionResult<ProductResponseDto>> GetById(int id, CancellationToken cancellationToken)
         {
-            var product = await _productService.GetProductByIdAsync(id);
+            var product = await _productService.GetProductByIdAsync(id, cancellationToken);
 
             if(product == null)
             {
@@ -74,7 +74,7 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductUpdateDto dto)
+        public async Task<IActionResult> Update(int id, [FromBody] ProductUpdateDto dto, CancellationToken cancellationToken)
         {
             if(!ModelState.IsValid)
             {
@@ -82,7 +82,7 @@ namespace EsportShop.Api.Controllers
             }
 
             // Votre service se chargera de mettre à jour ou de lancer une KeyNotFoundException si l'ID n'existe pas
-            await _productService.UpdateProductAsync(id, dto);
+            await _productService.UpdateProductAsync(id, dto, cancellationToken);
 
             _logger.LogInformation("Produit mis à jour ID : {ProductID}", id);
 
@@ -96,9 +96,9 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            await _productService.DeleteProductAsync(id);
+            await _productService.DeleteProductAsync(id, cancellationToken);
 
             _logger.LogInformation("Produit supprimé ID : {ProductId}", id);
 
@@ -110,9 +110,9 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> DeleteAll()
+        public async Task<IActionResult> DeleteAll(CancellationToken cancellationToken)
         {
-            await _productService.DeleteAllProductAsync();
+            await _productService.DeleteAllProductAsync(cancellationToken);
 
             _logger.LogWarning("Suppression massive de TOUS les produits de la boutique !");
 

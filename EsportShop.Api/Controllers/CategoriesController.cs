@@ -22,9 +22,9 @@ public class CategoriesController : ControllerBase
     // 1. READ ALL (Récupérer toutes les catégories - Public)
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<CategoryResponseDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<CategoryResponseDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<CategoryResponseDto>>> GetAll(CancellationToken cancellationToken)
     {
-        var categories = await _categoryService.GetAllCategoriesAsync();
+        var categories = await _categoryService.GetAllCategoriesAsync(cancellationToken);
         return Ok(categories);
     }
 
@@ -32,9 +32,9 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(CategoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CategoryResponseDto>> GetById(int id)
+    public async Task<ActionResult<CategoryResponseDto>> GetById(int id, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetCategoryByIdAsync(id);
+        var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
         if (category == null)
         {
             _logger.LogWarning("Tentative d'accès à une catégorie inexistante avec l'ID : {Id}", id);
@@ -50,7 +50,7 @@ public class CategoriesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<CategoryResponseDto>> Create([FromBody] CategoryCreateDto dto)
+    public async Task<ActionResult<CategoryResponseDto>> Create([FromBody] CategoryCreateDto dto, CancellationToken cancellationToken)
     {
 
         if(!ModelState.IsValid)
@@ -58,7 +58,7 @@ public class CategoriesController : ControllerBase
             return BadRequest(ModelState);
         }
        
-        var createdCategory = await _categoryService.CreateCategoryAsync(dto);
+        var createdCategory = await _categoryService.CreateCategoryAsync(dto, cancellationToken);
         _logger.LogInformation("Catégorie créée avec succès : {Name}", dto.Name);
 
         return CreatedAtAction(nameof(GetById), new { id = createdCategory.Id }, createdCategory);
@@ -72,13 +72,13 @@ public class CategoriesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Update(int id, [FromBody] CategoryUpdateDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] CategoryUpdateDto dto, CancellationToken cancellationToken)
     {
-        if(ModelState.IsValid)
+        if(!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        await _categoryService.UpdateCategoryAsync(id, dto);
+        await _categoryService.UpdateCategoryAsync(id, dto, cancellationToken);
         _logger.LogInformation("Catégorie mise à jour avec succès ID : {Id}", id);
 
         return NoContent();
@@ -91,9 +91,9 @@ public class CategoriesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
-        await _categoryService.DeleteCategoryAsync(id);
+        await _categoryService.DeleteCategoryAsync(id, cancellationToken);
         _logger.LogInformation("Catégorie supprimée avec succès ID : {Id}", id);
 
         return NoContent();

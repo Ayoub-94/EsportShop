@@ -4,10 +4,10 @@ namespace EsportShop.Api.Services
 {
     public interface ICartService
     {
-        Task<CartDto> GetCartByUserIdAsync(int  userId);
-        Task AddToCartAsync(int userId, AddToCartDto request);
-        Task UpdateItemQuantityAsync(int userId, int productId, int newQuantity);
-        Task RemoveItemAsync(int userId, int productId);
-        Task ClearCartAsync(int userId);
+        Task<CartDto> GetCartByUserIdAsync(int  userId, CancellationToken cancellationToken);
+        Task AddToCartAsync(int userId, AddToCartDto request, CancellationToken cancellationToken);
+        Task UpdateItemQuantityAsync(int userId, int productId, int newQuantity, CancellationToken cancellationToken);
+        Task RemoveItemAsync(int userId, int productId, CancellationToken cancellationToken);
+        Task ClearCartAsync(int userId, CancellationToken cancellationToken);
     }
 }

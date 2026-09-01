@@ -1,6 +1,7 @@
 ﻿using EsportShop.Api.DTOs;
 using EsportShop.Api.Models;
 using EsportShop.Api.Repositories;
+using Mapster;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -19,35 +20,30 @@ namespace EsportShop.Api.Services
             _configuration = configuration;
         }
 
-        public async Task<UserResponseDto> RegisterAsync(UserRegisterDto request)
+        public async Task<UserResponseDto> RegisterAsync(UserRegisterDto request, CancellationToken cancellationToken)
         {
             // 1. Vérifier si l'utilisateur existe déjà
-            var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email);
+            var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email, cancellationToken);
             if (existingUser != null) throw new InvalidOperationException("Cet e-mail est déjà utilisé.");
 
-            // 2. Hacher le mot de passe (utiliser BCrypt)
+            // 2. Mapper le DTO vers l'entité User via Mapster
+            var user = request.Adapt<User>();
+
+            // 3. Hacher le mot de passe (on écrase le mot de passe en clair par le hash)
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-            // 3. Créer l'entité User
-
-            var user = new User
-            {
-                Email = request.Email,
-                PasswordHash = passwordHash,
-                Role = "User"
-            };
+            user.Role = "user";
 
             // 4. Ajouter via le repository et sauvegarder via l'Unit of Work
-            await _unitOfWork.Users.AddAsync(user);
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.Users.AddAsync(user, cancellationToken);
+            await _unitOfWork.CompleteAsync(cancellationToken);
 
-            // 5. Retourner le DTO de réponse
-            return new UserResponseDto(user.Id, user.Email, user.Role);
+
+            return user.Adapt<UserResponseDto>(); 
         }
 
-        public async Task<string> LoginAsync(UserLoginDto request)
+        public async Task<string> LoginAsync(UserLoginDto request, CancellationToken cancellationToken) 
         {
-            var user = await _unitOfWork.Users.GetByEmailAsync(request.Email);
+            var user = await _unitOfWork.Users.GetByEmailAsync(request.Email, cancellationToken);
             if(user == null)
             {
                 throw new UnauthorizedAccessException("Identifiants invalides");

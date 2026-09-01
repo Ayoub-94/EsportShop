@@ -31,14 +31,14 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<UserResponseDto>> Register([FromBody] UserRegisterDto request)
+        public async Task<ActionResult<UserResponseDto>> Register([FromBody] UserRegisterDto request, CancellationToken cancellationToken)
         {
             // La validation automatique des DataAnnotations (ou FluentValidation) s'exécute ici avant d'entrer
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-           var response = await _authService.RegisterAsync(request);
+           var response = await _authService.RegisterAsync(request, cancellationToken);
 
             _logger.LogInformation("Nouvel utilisateur inscrit avec succès : {Email}", request.Email);
 
@@ -56,14 +56,14 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Login([FromBody] UserLoginDto request)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var token = await _authService.LoginAsync(request);
+            var token = await _authService.LoginAsync(request, cancellationToken);
 
             _logger.LogInformation("Connexion réussie pour l'utilisateur : {Email}", request.Email);
 

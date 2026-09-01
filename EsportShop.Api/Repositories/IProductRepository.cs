@@ -4,10 +4,10 @@ namespace EsportShop.Api.Repositories
 {
     public interface IProductRepository
     {
-        Task<IEnumerable<Product>> GetAllAsync();
-        Task<Product?> GetByIdAsync(int id);
-        Task AddAsync(Product product);
-        Task UpdateAsync(Product product);
-        Task DeleteAsync(Product product);
+        Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken);
+        Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken);
+        Task AddAsync(Product product, CancellationToken cancellationToken);
+        Task UpdateAsync(Product product, CancellationToken cancellationToken);
+        Task DeleteAsync(Product product, CancellationToken cancellationToken);
     }
 }

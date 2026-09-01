@@ -25,9 +25,9 @@ namespace EsportShop.Api.Repositories
             Carts = cartRepository;
         }
 
-        public async Task<bool> CompleteAsync()
+        public async Task<bool> CompleteAsync(CancellationToken cancellationToken)
         {
-            return await _context.SaveChangesAsync() > 0;
+            return await _context.SaveChangesAsync(cancellationToken) > 0;
         }
 
         public void Dispose()

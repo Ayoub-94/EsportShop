@@ -7,6 +7,6 @@
         IUserRepository Users { get; }
         ICartRepository Carts { get; }
 
-        Task<bool> CompleteAsync();
+        Task<bool> CompleteAsync(CancellationToken cancellationToken);
     }
 }

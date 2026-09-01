@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace EsportShop.Api.Controllers
 {
     [Authorize]
-    [Route("api/v1/cart")] 
+    [Route("api/v1/cart")]
     [ApiController]
     [Produces("application/json")]
     public class CartController : ControllerBase
@@ -24,11 +24,10 @@ namespace EsportShop.Api.Controllers
             _logger = logger;
         }
 
-        // Méthode utilitaire privée pour extraire proprement le UserId du JWT
         private int GetUserIdFromToken()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-            if(int.TryParse(userIdClaim, out int userId))
+            if (int.TryParse(userIdClaim, out int userId))
             {
                 return userId;
             }
@@ -42,10 +41,10 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<CartDto>> GetCart()
+        public async Task<ActionResult<CartDto>> GetCart(CancellationToken cancellationToken)
         {
             int userId = GetUserIdFromToken();
-            var cart = await _cartService.GetCartByUserIdAsync(userId);
+            var cart = await _cartService.GetCartByUserIdAsync(userId, cancellationToken);
             return Ok(cart);
         }
 
@@ -57,7 +56,7 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> AddToCart([FromBody] AddToCartDto request)
+        public async Task<IActionResult> AddToCart([FromBody] AddToCartDto request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -65,7 +64,7 @@ namespace EsportShop.Api.Controllers
             }
 
             int userId = GetUserIdFromToken();
-            await _cartService.AddToCartAsync(userId, request);
+            await _cartService.AddToCartAsync(userId,request, cancellationToken);
 
             _logger.LogInformation("Produit ajouté au panier pour l'utilisateur ID : {UserId}", userId);
             return Ok(new { message = "Produit ajouté au panier avec succès." });
@@ -79,7 +78,7 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> UpdateQuantity(int productId, [FromBody] int newQuantity)
+        public async Task<IActionResult> UpdateQuantity(int productId, [FromBody] int newQuantity, CancellationToken cancellationToken)
         {
             if (newQuantity < 0)
             {
@@ -87,9 +86,9 @@ namespace EsportShop.Api.Controllers
             }
 
             int userId = GetUserIdFromToken();
-            await _cartService.UpdateItemQuantityAsync(userId, productId, newQuantity);
+            await _cartService.UpdateItemQuantityAsync(userId, productId, newQuantity, cancellationToken);
 
-            return Ok(new { message = "Quantité mise à jour avce succès" });            
+            return Ok(new { message = "Quantité mise à jour avec succès" });
         }
 
         /// <summary>
@@ -99,14 +98,12 @@ namespace EsportShop.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> RemoveItem(int productId)
+        public async Task<IActionResult> RemoveItem(int productId, CancellationToken cancellationToken)
         {
-            
             int userId = GetUserIdFromToken();
-            await _cartService.RemoveItemAsync(userId, productId);
+            await _cartService.RemoveItemAsync(userId, productId, cancellationToken);
 
-            return Ok(new { message = "article supprimé du panier avec succès." });
-            
+            return Ok(new { message = "Article supprimé du panier avec succès." });
         }
 
         /// <summary>
@@ -115,12 +112,12 @@ namespace EsportShop.Api.Controllers
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> ClearCart()
+        public async Task<IActionResult> ClearCart(CancellationToken cancellationToken)
         {
             int userId = GetUserIdFromToken();
-            await _cartService.ClearCartAsync(userId);
+            await _cartService.ClearCartAsync(userId, cancellationToken);
 
-            return Ok(new { message = "Panier vidé avec succès" }); 
+            return Ok(new { message = "Panier vidé avec succès" });
         }
     }
 }
